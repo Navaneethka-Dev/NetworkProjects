@@ -1,0 +1,72 @@
+# SDN Traffic Controller Configuration
+# Author: Navaneethraj KA
+
+controller:
+  # OpenFlow settings
+  openflow_version: "1.3"
+  listen_host: "0.0.0.0"
+  listen_port: 6653
+  
+  # REST API settings
+  rest_host: "0.0.0.0"
+  rest_port: 8080
+
+monitoring:
+  # Statistics collection interval (seconds)
+  stats_interval: 10
+  
+  # Flow entry timeout (seconds)
+  flow_idle_timeout: 300
+  flow_hard_timeout: 0
+  
+  # Enable topology discovery
+  enable_topology_discovery: true
+
+qos:
+  # Default traffic priority (1-7, lower is higher priority)
+  default_priority: 4
+  
+  # Number of QoS queues
+  num_queues: 8
+  
+  # Predefined QoS classes
+  classes:
+    voice:
+      priority: 1
+      min_bandwidth: 100000  # 100 Kbps
+      max_bandwidth: 1000000  # 1 Mbps
+    video:
+      priority: 2
+      min_bandwidth: 1000000  # 1 Mbps
+      max_bandwidth: 10000000  # 10 Mbps
+    data:
+      priority: 4
+      min_bandwidth: 0
+      max_bandwidth: 0  # Best effort
+
+load_balancer:
+  # Default algorithm: round_robin, weighted, least_connections
+  algorithm: "round_robin"
+  
+  # Health check settings
+  health_check:
+    enabled: true
+    interval: 5  # seconds
+    timeout: 2  # seconds
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+  
+  # Session persistence
+  session_persistence:
+    enabled: false
+    timeout: 300  # seconds
+
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"
+  
+  # Log file path
+  file: "logs/sdn_controller.log"
+  
+  # Enable flow logging
+  log_flows: true

@@ -1,0 +1,62 @@
+# Network Policy Compliance Rules
+# Used by the auditor to check policy security
+
+rules:
+  - id: deny-by-default
+    name: Default Deny Policy
+    description: Namespace should have a default deny policy
+    severity: high
+    check: has_default_deny
+    recommendation: |
+      Create a default deny policy:
+      kubectl apply -f templates/deny-all.yaml
+
+  - id: no-allow-all-ingress
+    name: No Allow-All Ingress
+    description: Avoid policies that allow all ingress traffic
+    severity: high
+    check: no_empty_ingress
+    recommendation: |
+      Specify explicit 'from' selectors in ingress rules
+
+  - id: no-allow-all-egress
+    name: No Allow-All Egress
+    description: Avoid policies that allow all egress traffic
+    severity: medium
+    check: no_empty_egress
+    recommendation: |
+      Specify explicit 'to' selectors in egress rules
+
+  - id: explicit-ports
+    name: Explicit Port Specification
+    description: Always specify explicit ports in rules
+    severity: medium
+    check: has_explicit_ports
+    recommendation: |
+      Add 'ports' specification to each ingress/egress rule
+
+  - id: labeled-selectors
+    name: Use Labeled Selectors
+    description: Use specific label selectors instead of empty selectors
+    severity: low
+    check: has_labeled_selectors
+    recommendation: |
+      Use matchLabels in podSelector for precise targeting
+
+  - id: egress-control
+    name: Egress Traffic Control
+    description: Control outbound traffic with egress policies
+    severity: medium
+    check: has_egress_policy
+    recommendation: |
+      Create egress policies to control outbound traffic
+
+thresholds:
+  pass: 80
+  warning: 60
+  fail: 0
+
+ignore_namespaces:
+  - kube-system
+  - kube-public
+  - kube-node-lease

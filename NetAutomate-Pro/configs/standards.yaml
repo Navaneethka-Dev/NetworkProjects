@@ -1,0 +1,88 @@
+# NetAutomate Pro - Compliance Standards
+# Define your security and operational standards here
+
+security:
+  - name: SSH Enabled
+    description: SSH should be enabled for secure remote access
+    pattern: 'transport input ssh'
+    required: true
+    severity: high
+    recommendation: Configure SSH on VTY lines
+
+  - name: Telnet Disabled
+    description: Telnet should not be used (insecure)
+    pattern: 'transport input telnet'
+    required: false
+    severity: high
+    recommendation: Remove telnet from transport input
+
+  - name: Enable Secret Configured
+    description: Enable secret password must be set
+    pattern: 'enable secret'
+    required: true
+    severity: critical
+    recommendation: Set enable secret password
+
+  - name: Password Encryption
+    description: Password encryption service must be enabled
+    pattern: 'service password-encryption'
+    required: true
+    severity: high
+    recommendation: Enable service password-encryption
+
+  - name: HTTP Server Disabled
+    description: HTTP server should be disabled
+    pattern: 'no ip http server'
+    required: true
+    severity: high
+    recommendation: Disable HTTP with 'no ip http server'
+
+  - name: Login Banner
+    description: Login banner must be configured
+    pattern: 'banner (login|motd)'
+    required: true
+    severity: medium
+    recommendation: Configure a login warning banner
+
+  - name: Console Timeout
+    description: Console session timeout should be set
+    pattern: 'exec-timeout \d+ \d+'
+    required: true
+    severity: medium
+    recommendation: Set exec-timeout on console line
+
+operational:
+  - name: Hostname Configured
+    description: Hostname must be set
+    pattern: '^hostname \S+'
+    required: true
+    severity: low
+    recommendation: Set a meaningful hostname
+
+  - name: Domain Name
+    description: Domain name should be configured
+    pattern: 'ip domain.name'
+    required: true
+    severity: low
+    recommendation: Configure ip domain-name
+
+  - name: NTP Server
+    description: NTP should be configured for time sync
+    pattern: 'ntp server'
+    required: true
+    severity: medium
+    recommendation: Configure NTP servers
+
+  - name: Logging Configured
+    description: Logging should be enabled
+    pattern: 'logging (host|buffered)'
+    required: true
+    severity: medium
+    recommendation: Configure logging buffered and syslog server
+
+  - name: SNMP Configured
+    description: SNMP should be configured for monitoring
+    pattern: 'snmp-server'
+    required: true
+    severity: medium
+    recommendation: Configure SNMP for network monitoring

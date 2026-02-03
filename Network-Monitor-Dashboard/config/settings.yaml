@@ -1,0 +1,31 @@
+# Network Monitoring Dashboard Configuration
+server:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+
+snmp:
+  community: "public"
+  version: "2c"
+  timeout: 5
+  retries: 3
+
+polling:
+  interval: 60
+  threads: 10
+
+alerting:
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    username: ""
+    password: ""
+    recipients: []
+  webhook:
+    enabled: false
+    url: ""
+
+database:
+  path: "data/network.db"
+  retention_days: 30

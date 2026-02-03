@@ -1,0 +1,51 @@
+# NetAutomate Pro - Device Inventory
+# Edit this file to add your network devices
+
+devices:
+  # Example Cisco Router
+  - hostname: router1
+    ip: 192.168.1.1
+    device_type: cisco_ios
+    username: admin
+    password: cisco123
+    secret: enablepass
+    port: 22
+    
+  # Example Cisco Switch
+  - hostname: switch1
+    ip: 192.168.1.2
+    device_type: cisco_ios
+    username: admin
+    password: cisco123
+    secret: enablepass
+    port: 22
+    
+  # Example Cisco NX-OS Switch
+  - hostname: nexus1
+    ip: 192.168.1.3
+    device_type: cisco_nxos
+    username: admin
+    password: cisco123
+    port: 22
+    
+  # Example Juniper Router
+  - hostname: juniper1
+    ip: 192.168.1.4
+    device_type: juniper_junos
+    username: admin
+    password: juniper123
+    port: 22
+
+  # Example Distribution Switch
+  - hostname: dist-sw1
+    ip: 192.168.1.5
+    device_type: cisco_ios
+    username: admin
+    password: cisco123
+    secret: enablepass
+    port: 22
+
+# Note: For production, use environment variables or vault for credentials
+# Example:
+#   username: ${NET_USERNAME}
+#   password: ${NET_PASSWORD}
