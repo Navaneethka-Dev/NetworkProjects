@@ -12,24 +12,33 @@ import click
 import yaml
 import os
 import sys
+import io
 from datetime import datetime
 from pathlib import Path
+
+# Ensure UTF-8 output on Windows (cp1252 can't encode emoji)
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 # Add the package to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from netautomate.core import NetworkAutomation
 from netautomate.utils import setup_logging, print_banner
+from netautomate.reporter import ReportGenerator
+from netautomate.backup import BackupManager
 
 # Setup logging
 logger = setup_logging()
 
 @click.group()
-@click.version_option(version='1.0.0', prog_name='NetAutomate Pro')
+@click.version_option(version='1.1.0', prog_name='NetAutomate Pro')
 def cli():
     """
-    🌐 NetAutomate Pro - Network Automation Tool
-    
+    NetAutomate Pro - Network Automation Tool
+
     Automate network device configurations across multi-vendor environments.
     Supports Cisco IOS, NX-OS, and Juniper Junos devices.
     """
@@ -225,6 +234,103 @@ def execute(device, command, inventory):
             
     except Exception as e:
         click.echo(click.style(f"❌ Error: {str(e)}", fg='red'))
+
+@cli.command()
+@click.option('--type', '-t', 'report_type',
+              type=click.Choice(['compliance', 'backup'], case_sensitive=False),
+              default='compliance', show_default=True,
+              help='Type of report to generate.')
+@click.option('--format', '-f', 'fmt',
+              type=click.Choice(['html', 'json'], case_sensitive=False),
+              default='html', show_default=True,
+              help='Output format.')
+@click.option('--output-dir', '-o', default='reports', show_default=True,
+              help='Directory to write the report into.')
+@click.option('--inventory', '-i', default='inventory/devices.yaml',
+              help='Inventory file path.')
+@click.option('--standards', '-s', default='configs/standards.yaml',
+              help='Compliance standards file (compliance reports only).')
+def report(report_type, fmt, output_dir, inventory, standards):
+    """
+    📊 Generate HTML or JSON reports
+
+    \b
+    Examples:
+      python main.py report --type compliance --format html
+      python main.py report --type backup     --format json
+    """
+    try:
+        reporter = ReportGenerator(output_dir=output_dir)
+
+        if report_type == 'compliance':
+            na = NetworkAutomation(inventory)
+            click.echo(click.style(
+                f"\n🔍 Running compliance checks on {len(na.devices)} device(s)…\n",
+                fg='cyan', bold=True
+            ))
+            results = na.check_compliance_all(standards_file=standards)
+            path = reporter.generate_compliance_report(results, fmt=fmt)
+
+        else:  # backup
+            bm = BackupManager()
+            backups = bm.list_backups()
+            path = reporter.generate_backup_report(backups, fmt=fmt)
+
+        click.echo(click.style(f"✅ Report generated: {path}", fg='green', bold=True))
+
+    except FileNotFoundError as exc:
+        click.echo(click.style(f"❌ File not found: {exc}", fg='red'))
+    except Exception as exc:
+        click.echo(click.style(f"❌ Error: {exc}", fg='red'))
+        logger.exception("Report command failed")
+
+
+@cli.command('schedule')
+@click.option('--backup-hours', default=6, show_default=True,
+              help='Run fleet backup every N hours (0 = disabled).')
+@click.option('--health-minutes', default=15, show_default=True,
+              help='Run device health-checks every N minutes (0 = disabled).')
+@click.option('--inventory', '-i', default='inventory/devices.yaml',
+              help='Inventory file path.')
+def schedule_cmd(backup_hours, health_minutes, inventory):
+    """
+    ⏰ Start the background scheduler
+
+    Runs periodic backups and health-checks in the foreground.
+    Press Ctrl-C to stop.
+
+    \b
+    Example:
+      python main.py schedule --backup-hours 6 --health-minutes 15
+    """
+    try:
+        from netautomate.scheduler import NetAutomateScheduler
+
+        na = NetworkAutomation(inventory)
+        sched = NetAutomateScheduler(na)
+
+        if backup_hours > 0:
+            sched.schedule_backups(interval_hours=backup_hours)
+            click.echo(click.style(
+                f"  📦 Backups scheduled every {backup_hours}h", fg='cyan'))
+
+        if health_minutes > 0:
+            sched.schedule_health_checks(interval_minutes=health_minutes)
+            click.echo(click.style(
+                f"  💓 Health checks scheduled every {health_minutes}m", fg='cyan'))
+
+        click.echo(click.style("\n⏰ Scheduler running. Press Ctrl-C to stop.\n",
+                               fg='green', bold=True))
+        sched.start(blocking=True)
+
+    except ImportError:
+        click.echo(click.style(
+            "❌ 'schedule' library not installed. Run: pip install schedule",
+            fg='red'))
+    except Exception as exc:
+        click.echo(click.style(f"❌ Error: {exc}", fg='red'))
+        logger.exception("Schedule command failed")
+
 
 if __name__ == '__main__':
     cli()

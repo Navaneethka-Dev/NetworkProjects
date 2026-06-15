@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.venv/
+venv/
+.env
+*.sqlite
+*.db
+
+# Next.js / Node
+node_modules/
+.next/
+out/
+dist/
+*.lock
+npm-debug.log*
+
+# Docker
+*.override.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Alembic (keep versions under VCS)
+backend/alembic/__pycache__/
+
+# Secrets (never commit)
+.env
+backend/.env

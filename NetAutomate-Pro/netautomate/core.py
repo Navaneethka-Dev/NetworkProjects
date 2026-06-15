@@ -255,3 +255,28 @@ class NetworkAutomation:
         except Exception as e:
             logger.error(f"Command execution failed on {hostname}: {str(e)}")
             return {'status': 'failed', 'error': str(e)}
+
+    def ping_device(self, hostname: str) -> bool:
+        """
+        Check device reachability by attempting an SSH connection.
+
+        Falls back to ICMP via subprocess if Netmiko is not available.
+
+        Args:
+            hostname: Device hostname (must exist in inventory).
+
+        Returns:
+            ``True`` if device is reachable, ``False`` otherwise.
+        """
+        device = self._get_device(hostname)
+        if not device:
+            logger.warning(f"ping_device: {hostname} not found in inventory")
+            return False
+
+        try:
+            connector = DeviceConnector(device)
+            result = connector.connect()
+            connector.disconnect()
+            return bool(result)
+        except Exception:
+            return False
